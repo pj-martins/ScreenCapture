@@ -1,0 +1,6 @@
+ScreenCapture/bin/
+ScreenCapture/obj/
+Common/obj/
+Common/bin/
+*.user
+*.eof
