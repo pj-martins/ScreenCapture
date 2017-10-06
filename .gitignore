@@ -4,3 +4,6 @@ Common/obj/
 Common/bin/
 *.user
 *.eof
+obj/
+bin/
+.vs/
