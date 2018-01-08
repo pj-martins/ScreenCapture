@@ -10,9 +10,6 @@ namespace PaJaMa.ScreenCapture
 {
 	public class UserSettings
 	{
-		public int FormWidth { get; set; }
-		public int FormHeight { get; set; }
-		public bool Maximized { get; set; }
 		public int ThumbnailSize { get; set; }
 		public int SplitterDistance { get; set; }
 		public int DrawColorArgb { get; set; }

@@ -20,6 +20,7 @@ namespace PaJaMa.ScreenCapture
 	public partial class frmMain : Form
 	{
 		private UserSettings _userSettings;
+		private bool _isMaximized;
 		private DirectoryInfo _picturesDirectory { get; set; }
 		//private Dictionary<string, Image> _images = new Dictionary<string, Image>();
 		private int[] _lastSelectedIndices;
@@ -32,11 +33,6 @@ namespace PaJaMa.ScreenCapture
 		//private bool _drawingArrow = false;
 		//private Point _mouseDownLocation;
 		//private Graphics _currGraphics;
-
-		private string userSettingsConfigFile
-		{
-			get { return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "PJCapture", "UserSettings.xml"); }
-		}
 
 		public frmMain()
 		{
@@ -98,11 +94,11 @@ namespace PaJaMa.ScreenCapture
 			this.Visible = true;
 			this.ShowInTaskbar = true;
 			if (this.WindowState == FormWindowState.Minimized)
-				this.WindowState = _userSettings.Maximized ? FormWindowState.Maximized : FormWindowState.Normal;
+				this.WindowState = _isMaximized ? FormWindowState.Maximized : FormWindowState.Normal;
 			Win32Api.SetForegroundWindow(this.Handle);
 
 			_lockWatcher = false;
-			
+
 			return imagePath;
 		}
 
@@ -160,72 +156,57 @@ namespace PaJaMa.ScreenCapture
 		{
 
 			_lock = true;
-			if (File.Exists(userSettingsConfigFile))
+			_userSettings = SettingsHelper.GetUserSettings<UserSettings>();
+			try
 			{
-				try
-				{
-					_userSettings = XmlSerialize.DeserializeObjectFromFile<UserSettings>(userSettingsConfigFile);
-					this.Height = _userSettings.FormHeight;
-					this.Width = _userSettings.FormWidth;
-					if (_userSettings.Maximized)
-						this.WindowState = FormWindowState.Maximized;
-					splitMain.SplitterDistance = _userSettings.SplitterDistance;
-					ilMain.ImageSize = new Size(_userSettings.ThumbnailSize, _userSettings.ThumbnailSize);
 
-					if (_userSettings.DrawColorArgb != 0)
-						ucImageEditor.DrawColor = Color.FromArgb(_userSettings.DrawColorArgb);
-					else
-						ucImageEditor.DrawColor = Color.Blue;
+				FormSettings.LoadSettings(this);
+				splitMain.SplitterDistance = _userSettings.SplitterDistance;
+				ilMain.ImageSize = new Size(_userSettings.ThumbnailSize, _userSettings.ThumbnailSize);
 
-					if (_userSettings.DrawWidth > 0)
-						ucImageEditor.DrawWidth = _userSettings.DrawWidth;
-					else
-						ucImageEditor.DrawWidth = 1;
+				if (_userSettings.DrawColorArgb != 0)
+					ucImageEditor.DrawColor = Color.FromArgb(_userSettings.DrawColorArgb);
+				else
+					ucImageEditor.DrawColor = Color.Blue;
 
-					if (_userSettings.EraseColorArgb != 0)
-						ucImageEditor.EraseColor = Color.FromArgb(_userSettings.EraseColorArgb);
-					else
-						ucImageEditor.EraseColor = Color.White;
+				if (_userSettings.DrawWidth > 0)
+					ucImageEditor.DrawWidth = _userSettings.DrawWidth;
+				else
+					ucImageEditor.DrawWidth = 1;
 
-					if (_userSettings.EraseWidth > 0)
-						ucImageEditor.EraseWidth = _userSettings.EraseWidth;
-					else
-						ucImageEditor.EraseWidth = 10;
+				if (_userSettings.EraseColorArgb != 0)
+					ucImageEditor.EraseColor = Color.FromArgb(_userSettings.EraseColorArgb);
+				else
+					ucImageEditor.EraseColor = Color.White;
 
-					if (_userSettings.HighlightColorArgb != 0)
-						ucImageEditor.HighlightColor = Color.FromArgb(_userSettings.HighlightColorArgb);
-					else
-						ucImageEditor.HighlightColor = Color.FromArgb(100, Color.Yellow);
+				if (_userSettings.EraseWidth > 0)
+					ucImageEditor.EraseWidth = _userSettings.EraseWidth;
+				else
+					ucImageEditor.EraseWidth = 10;
 
-					if (_userSettings.HighlightWidth > 0)
-						ucImageEditor.HighlightWidth = _userSettings.HighlightWidth;
-					else
-						ucImageEditor.HighlightWidth = 10;
+				if (_userSettings.HighlightColorArgb != 0)
+					ucImageEditor.HighlightColor = Color.FromArgb(_userSettings.HighlightColorArgb);
+				else
+					ucImageEditor.HighlightColor = Color.FromArgb(100, Color.Yellow);
 
-					if (!string.IsNullOrEmpty(_userSettings.Font))
-						ucImageEditor.CurrentFont = (Font)new FontConverter().ConvertFromString(_userSettings.Font);
-					else
-						ucImageEditor.CurrentFont = new Font(FontFamily.GenericSansSerif, 12);
+				if (_userSettings.HighlightWidth > 0)
+					ucImageEditor.HighlightWidth = _userSettings.HighlightWidth;
+				else
+					ucImageEditor.HighlightWidth = 10;
 
-					if (_userSettings.Radius > 0)
-						ucImageEditor.CurrentRadius = _userSettings.Radius;
-					else
-						ucImageEditor.CurrentRadius = 8;
-				}
-				catch
-				{
-					_userSettings = new UserSettings();
-				}
+				if (!string.IsNullOrEmpty(_userSettings.Font))
+					ucImageEditor.CurrentFont = (Font)new FontConverter().ConvertFromString(_userSettings.Font);
+				else
+					ucImageEditor.CurrentFont = new Font(FontFamily.GenericSansSerif, 12);
 
+				if (_userSettings.Radius > 0)
+					ucImageEditor.CurrentRadius = _userSettings.Radius;
+				else
+					ucImageEditor.CurrentRadius = 8;
 			}
-			else
+			catch
 			{
 				_userSettings = new UserSettings();
-				ucImageEditor.CurrentColor = Color.Blue;
-				ucImageEditor.CurrentWidth = 1;
-				ucImageEditor.EraseColor = Color.White;
-				ucImageEditor.EraseWidth = 10;
-				ucImageEditor.CurrentFont = new Font(FontFamily.GenericSansSerif, 12);
 			}
 
 			lstMain.MouseWheel += lstMain_MouseWheel;
@@ -256,9 +237,8 @@ namespace PaJaMa.ScreenCapture
 		{
 			if (this.Visible)
 			{
-				_userSettings.FormHeight = this.Height;
-				_userSettings.FormWidth = this.Width;
-				_userSettings.Maximized = this.WindowState == FormWindowState.Maximized;
+				FormSettings.SaveSettings(this);
+				_isMaximized = this.WindowState == FormWindowState.Maximized;
 				_userSettings.ThumbnailSize = ilMain.ImageSize.Width;
 				_userSettings.SplitterDistance = splitMain.SplitterDistance;
 				_userSettings.DrawColorArgb = ucImageEditor.DrawColor.ToArgb();
@@ -269,7 +249,7 @@ namespace PaJaMa.ScreenCapture
 				_userSettings.EraseWidth = ucImageEditor.EraseWidth;
 				_userSettings.Font = new FontConverter().ConvertToString(ucImageEditor.CurrentFont);
 				_userSettings.Radius = ucImageEditor.CurrentRadius;
-				XmlSerialize.SerializeObjectToFile<UserSettings>(_userSettings, userSettingsConfigFile);
+				SettingsHelper.SaveUserSettings<UserSettings>(_userSettings);
 			}
 
 			if (_lock) return;
@@ -464,7 +444,7 @@ namespace PaJaMa.ScreenCapture
 		{
 			this.ShowInTaskbar = true;
 			this.Visible = true;
-			this.WindowState = _userSettings.Maximized ? FormWindowState.Maximized : FormWindowState.Normal;
+			this.WindowState = _isMaximized ? FormWindowState.Maximized : FormWindowState.Normal;
 		}
 
 		private void exitToolStripMenuItem_Click(object sender, EventArgs e)
@@ -525,7 +505,7 @@ namespace PaJaMa.ScreenCapture
 
 		private void watcher_Changed(object sender, FileSystemEventArgs e)
 		{
-			if (_lockWatcher) 
+			if (_lockWatcher)
 				return;
 			this.Invoke(new Action(() =>
 			{
