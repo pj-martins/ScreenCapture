@@ -24,11 +24,35 @@ namespace PaJaMa.ScreenCapture
 
 		public KeyPressEventHandler KeyPress;
 
+		private enum ProcessDPIAwareness
+		{
+			ProcessDPIUnaware = 0,
+			ProcessSystemDPIAware = 1,
+			ProcessPerMonitorDPIAware = 2
+		}
+
+		[System.Runtime.InteropServices.DllImport("shcore.dll")]
+		private static extern int SetProcessDpiAwareness(ProcessDPIAwareness value);
+
 		public CaptureHelper()
 		{
 			_hooks = new GlobalHooks();
 			_hooks.KeyDown += _hooks_KeyDown;
 			_hooks.KeyPress += _hooks_KeyPress;
+		}
+
+		private static void SetDpiAwareness()
+		{
+			try
+			{
+				if (Environment.OSVersion.Version.Major >= 6)
+				{
+					SetProcessDpiAwareness(ProcessDPIAwareness.ProcessPerMonitorDPIAware);
+				}
+			}
+			catch (EntryPointNotFoundException)//this exception occures if OS does not implement this API, just ignore it.
+			{
+			}
 		}
 
 		private void _hooks_KeyPress(object sender, KeyPressEventArgs e)
@@ -133,12 +157,13 @@ namespace PaJaMa.ScreenCapture
 			_hooks.LeftMouseDown += _hooks_LeftMouseDown;
 			_hooks.LeftMouseUp += _hooks_LeftMouseUp;
 
+			SetDpiAwareness();
 			foreach (var screen in Screen.AllScreens)
 			{
 				var overlay = new frmOverlay();
-				overlay.SetBounds(screen.Bounds.X, screen.Bounds.Y, screen.Bounds.Width, screen.Bounds.Height);
-				overlay.ScreenX = screen.Bounds.X;
-				overlay.ScreenY = screen.Bounds.Y;
+				overlay.SetBounds(screen.WorkingArea.X, screen.WorkingArea.Y, screen.WorkingArea.Width, screen.WorkingArea.Height);
+				overlay.ScreenX = screen.WorkingArea.X;
+				overlay.ScreenY = screen.WorkingArea.Y;
 				overlay.StartPosition = FormStartPosition.Manual;
 				overlay.Show();
 				_overlays.Add(overlay);
