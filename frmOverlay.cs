@@ -38,6 +38,8 @@ namespace PaJaMa.ScreenCapture
 		public frmOverlay()
 		{
 			InitializeComponent();
+			this.AutoScaleDimensions = new SizeF(96F, 96F);
+			this.AutoScaleMode = AutoScaleMode.Dpi;
 
 		}
 

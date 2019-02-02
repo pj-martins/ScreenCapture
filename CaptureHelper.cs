@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -24,35 +25,11 @@ namespace PaJaMa.ScreenCapture
 
 		public KeyPressEventHandler KeyPress;
 
-		private enum ProcessDPIAwareness
-		{
-			ProcessDPIUnaware = 0,
-			ProcessSystemDPIAware = 1,
-			ProcessPerMonitorDPIAware = 2
-		}
-
-		[System.Runtime.InteropServices.DllImport("shcore.dll")]
-		private static extern int SetProcessDpiAwareness(ProcessDPIAwareness value);
-
 		public CaptureHelper()
 		{
 			_hooks = new GlobalHooks();
 			_hooks.KeyDown += _hooks_KeyDown;
 			_hooks.KeyPress += _hooks_KeyPress;
-		}
-
-		private static void SetDpiAwareness()
-		{
-			try
-			{
-				if (Environment.OSVersion.Version.Major >= 6)
-				{
-					SetProcessDpiAwareness(ProcessDPIAwareness.ProcessPerMonitorDPIAware);
-				}
-			}
-			catch (EntryPointNotFoundException)//this exception occures if OS does not implement this API, just ignore it.
-			{
-			}
 		}
 
 		private void _hooks_KeyPress(object sender, KeyPressEventArgs e)
@@ -70,9 +47,9 @@ namespace PaJaMa.ScreenCapture
 				bool mouseDown = _downX >= 0 && _downY >= 0;
 				foreach (var overlay in _overlays)
 				{
-					if (overlay.IsInControl(e.X, e.Y) || mouseDown)
+					if (overlay.IsInControl(Cursor.Position.X, Cursor.Position.Y) || mouseDown)
 					{
-						overlay.Draw(e.X, e.Y, _downX, _downY, mouseDown);
+						overlay.Draw(Cursor.Position.X, Cursor.Position.Y, _downX, _downY, mouseDown);
 					}
 					else
 						overlay.ClearGraphics();
@@ -107,7 +84,7 @@ namespace PaJaMa.ScreenCapture
 			{
 				foreach (var overlay in _overlays)
 				{
-					if (overlay.IsInControl(e.X, e.Y))
+					if (overlay.IsInControl(Cursor.Position.X, Cursor.Position.Y))
 					{
 						using (var image = overlay.GetImage())
 						{
@@ -126,8 +103,8 @@ namespace PaJaMa.ScreenCapture
 
 		private void _hooks_LeftMouseDown(object sender, MouseEventArgs e)
 		{
-			_downX = e.X;
-			_downY = e.Y;
+			_downX = Cursor.Position.X;
+			_downY = Cursor.Position.Y;
 			var args = (CancelMouseEventArgs)e;
 			args.Cancel = true;
 		}
@@ -157,7 +134,6 @@ namespace PaJaMa.ScreenCapture
 			_hooks.LeftMouseDown += _hooks_LeftMouseDown;
 			_hooks.LeftMouseUp += _hooks_LeftMouseUp;
 
-			SetDpiAwareness();
 			foreach (var screen in Screen.AllScreens)
 			{
 				var overlay = new frmOverlay();
