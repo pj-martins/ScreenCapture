@@ -235,6 +235,10 @@
       <Project>{4c71ada7-e306-467a-b014-9bd42287dcb1}</Project>
       <Name>PaJaMa.Common</Name>
     </ProjectReference>
+    <ProjectReference Include="..\WinControls\PaJaMa.WinControls.csproj">
+      <Project>{bd3684c1-dd08-441f-9448-ca39006e113a}</Project>
+      <Name>PaJaMa.WinControls</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

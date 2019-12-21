@@ -1,5 +1,6 @@
 ﻿using PaJaMa.Common;
 using PaJaMa.ScreenCapture.ImageEditor;
+using PaJaMa.WinControls;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;

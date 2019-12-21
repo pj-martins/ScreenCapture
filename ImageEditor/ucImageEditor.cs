@@ -10,6 +10,7 @@ using System.Windows.Forms;
 using System.Drawing.Imaging;
 using System.IO;
 using PaJaMa.Common;
+using PaJaMa.WinControls;
 
 namespace PaJaMa.ScreenCapture.ImageEditor
 {
@@ -287,8 +288,8 @@ namespace PaJaMa.ScreenCapture.ImageEditor
 					_zoomMultiplier -= .01F;
 
 					newSize = new Size((int)(_originalImage.Width * _zoomMultiplier), (int)(_originalImage.Height * _zoomMultiplier));
-					_originalImage = new Bitmap(Common.Imaging.ResizeImage(_originalImage, newSize));
-					_bmp = new Bitmap(Common.Imaging.ResizeImage(_originalImage, newSize));
+					_originalImage = new Bitmap(WinControls.Imaging.ResizeImage(_originalImage, newSize));
+					_bmp = new Bitmap(WinControls.Imaging.ResizeImage(_originalImage, newSize));
 				}
 				if (_originalImage.Height > pnlPicture.Height)
 				{
@@ -298,15 +299,15 @@ namespace PaJaMa.ScreenCapture.ImageEditor
 					_zoomMultiplier -= .01F;
 
 					newSize = new Size((int)(_originalImage.Width * _zoomMultiplier), (int)(_originalImage.Height * _zoomMultiplier));
-					_originalImage = new Bitmap(Common.Imaging.ResizeImage(_originalImage, newSize));
-					_bmp = new Bitmap(Common.Imaging.ResizeImage(_originalImage, newSize));
+					_originalImage = new Bitmap(WinControls.Imaging.ResizeImage(_originalImage, newSize));
+					_bmp = new Bitmap(WinControls.Imaging.ResizeImage(_originalImage, newSize));
 				}
 			}
 			else
 			{
 				newSize = new Size((int)(_originalImage.Width * _zoomMultiplier), (int)(_originalImage.Height * _zoomMultiplier));
-				_originalImage = new Bitmap(Common.Imaging.ResizeImage(_originalImage, newSize));
-				_bmp = new Bitmap(Common.Imaging.ResizeImage(_originalImage, newSize));
+				_originalImage = new Bitmap(WinControls.Imaging.ResizeImage(_originalImage, newSize));
+				_bmp = new Bitmap(WinControls.Imaging.ResizeImage(_originalImage, newSize));
 			}
 
 			bool locked = _lock;
