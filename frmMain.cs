@@ -23,6 +23,7 @@ namespace PaJaMa.ScreenCapture
 		private UserSettings _userSettings;
 		private bool _isMaximized;
 		private DirectoryInfo _picturesDirectory { get; set; }
+		private DirectoryInfo _videosDirectory { get; set; }
 		//private Dictionary<string, Image> _images = new Dictionary<string, Image>();
 		private int[] _lastSelectedIndices;
 
@@ -59,7 +60,14 @@ namespace PaJaMa.ScreenCapture
 
 		private void _captureHelper_PictureCaptured(object sender, CaptureEventArgs e)
 		{
-			captureImage(e.Image);
+			if (e.Images.Count == 1)
+			{
+				captureImage(e.Images[0]);
+			}
+			else
+			{
+				captureVideo(e.Images);
+			}
 		}
 
 		private string captureImage(Image image)
@@ -103,6 +111,43 @@ namespace PaJaMa.ScreenCapture
 			return imagePath;
 		}
 
+		private void captureVideo(List<Image> images)
+		{
+			_lockWatcher = true;
+			var videoPath = Path.Combine(_videosDirectory.FullName, DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".mp4");
+			if (!File.Exists("ffmpeg.exe"))
+			{
+				File.WriteAllBytes("ffmpeg.exe", Properties.Resources.ffmpeg1);
+			}
+
+			var files = new List<string>();
+			var tmp = Path.GetTempFileName();
+			var dir = Path.GetDirectoryName(tmp);
+			File.Delete(tmp);
+			int i = 0;
+			foreach (var img in images)
+			{
+				var path = tmp + i.ToString().PadLeft(5, '0') + ".jpg";
+				img.Save(path, System.Drawing.Imaging.ImageFormat.Jpeg);
+				files.Add(path);
+				i++;
+			}
+
+			var process = new Process();
+			process.StartInfo = new ProcessStartInfo("ffmpeg.exe", $"-i \"{Path.Combine(dir, tmp + "%05d.jpg")}\" -r 25 \"{videoPath}\"");
+			process.StartInfo.UseShellExecute = false;
+			process.StartInfo.CreateNoWindow = true;
+			process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+			process.Start();
+			process.WaitForExit();
+
+			System.Threading.Thread.Sleep(100);
+			foreach (var file in files)
+			{
+				File.Delete(file);
+			}
+		}
+
 		private void refreshList()
 		{
 			lstMain.Items.Clear();
@@ -119,6 +164,10 @@ namespace PaJaMa.ScreenCapture
 				watcher.EnableRaisingEvents = true;
 
 			}
+
+			_videosDirectory = new DirectoryInfo(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "PJCapture", "Videos"));
+			if (!_videosDirectory.Exists)
+				_videosDirectory.Create();
 
 			foreach (var file in _picturesDirectory.GetFiles().OrderByDescending(fi => fi.Name))
 			{
@@ -215,15 +264,25 @@ namespace PaJaMa.ScreenCapture
 			int i = 1;
 			foreach (var screen in Screen.AllScreens)
 			{
-				var mnu = new ToolStripMenuItem(screen.DeviceName + " - " + (i++).ToString(), null, captureScreenMenuItem_Click) { Tag = screen };
+				var mnu = new ToolStripMenuItem("Capture - " + screen.DeviceName + " - " + (i++).ToString(), null, captureScreenMenuItem_Click) { Tag = screen };
 				mnuNotification.Items.Insert(mnuNotification.Items.IndexOf(exitToolStripMenuItem), mnu);
 			}
+
+			i = 1;
+			foreach (var screen in Screen.AllScreens)
+			{
+				var mnu = new ToolStripMenuItem("Capture Video - " + screen.DeviceName + " - " + (i++).ToString(), null, captureVideoScreenMenuItem_Click) { Tag = screen };
+				mnuNotification.Items.Insert(mnuNotification.Items.IndexOf(exitToolStripMenuItem), mnu);
+			}
+
+			//var mnuShow = new ToolStripMenuItem("Show Screens", null, showScreens_Click);
+			//mnuNotification.Items.Insert(mnuNotification.Items.IndexOf(exitToolStripMenuItem), mnuShow);
 
 			_lock = false;
 
 			refreshList();
 			_captureHelper = new CaptureHelper();
-			_captureHelper.PictureCaptured += _captureHelper_PictureCaptured;
+			_captureHelper.Captured += _captureHelper_PictureCaptured;
 			_captureHelper.KeyPress += captureHelper_KeyPress;
 
 			openWithToolStripMenuItem.DropDownItems.Clear();
@@ -460,38 +519,36 @@ namespace PaJaMa.ScreenCapture
 			this.Close();
 		}
 
-		private void captureToolStripMenuItem_Click(object sender, EventArgs e)
+		private void CaptureToolStripMenuItem_Click(object sender, EventArgs e)
 		{
+			_captureHelper.CaptureVideo = false;
+			_captureHelper.StartCapture();
+		}
+
+		private void CaptureVideoToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			_captureHelper.CaptureVideo = true;
 			_captureHelper.StartCapture();
 		}
 
 		private void captureFullScreenToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-			//int xStop = 0;
-			//int yStop = 0;
-			//foreach (var screen in Screen.AllScreens)
-			//{
-			//	if (screen.Bounds.Right > xStop)
-			//		xStop = screen.Bounds.Right;
-
-			//	if (screen.Bounds.Bottom > yStop)
-			//		yStop = screen.Bounds.Bottom;
-			//}
-
-			//var bmp = new Bitmap(xStop, yStop);
-			//using (var graphics = Graphics.FromImage(bmp))
-			//{
-			//	graphics.CopyFromScreen(new Point(0, 0), new Point(0, 0), new Size(xStop, yStop));
-			//}
-
-			//captureImage(bmp);
+			_captureHelper.CaptureVideo = false;
 			_captureHelper.CaptureFullScreen();
 		}
 
 		private void captureScreenMenuItem_Click(object sender, EventArgs e)
 		{
 			var screen = (sender as ToolStripMenuItem).Tag as Screen;
+			_captureHelper.CaptureVideo = false;
 			_captureHelper.CaptureScreen(screen);
+		}
+
+		private void captureVideoScreenMenuItem_Click(object sender, EventArgs e)
+		{
+			_captureHelper.CaptureVideo = true;
+			var screen = (sender as ToolStripMenuItem).Tag as Screen;
+			_captureHelper.CaptureVideoScreen(screen);
 		}
 
 		private void watcher_Deleted(object sender, FileSystemEventArgs e)
@@ -538,7 +595,5 @@ namespace PaJaMa.ScreenCapture
 
 			openImage(ucImageEditor.FileName);
 		}
-
-
 	}
 }

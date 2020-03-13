@@ -134,6 +134,12 @@ namespace PaJaMa.ScreenCapture
 			return bmp;
 		}
 
+		public System.Drawing.Rectangle GetRectangle()
+		{
+			var size = new Size((int)(2 * Math.Ceiling(pnlSelection.Size.Width / 2D)), (int)(2 * Math.Ceiling(pnlSelection.Size.Height / 2D)));
+			return new System.Drawing.Rectangle(new Point(pnlSelection.Left + this.Left, pnlSelection.Top + this.Top), size);
+		}
+
 		private void draw(Control ctrl, int x, int y)
 		{
 			using (var graphics = ctrl.CreateGraphics())

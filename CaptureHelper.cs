@@ -21,10 +21,13 @@ namespace PaJaMa.ScreenCapture
 		private int? _downY = null;
 
 		private GlobalHooks _hooks;
+		private frmCaptureVideo _frmCaptureVideo;
 
-		public event CaptureEventHandler PictureCaptured;
+		public event CaptureEventHandler Captured;
 
 		public KeyPressEventHandler KeyPress;
+
+		public bool CaptureVideo { get; set; }
 
 		public CaptureHelper()
 		{
@@ -87,15 +90,32 @@ namespace PaJaMa.ScreenCapture
 				{
 					if (overlay.IsInControl(Cursor.Position.X, Cursor.Position.Y))
 					{
-						using (var image = overlay.GetImage())
+						if (this.CaptureVideo)
 						{
-							PictureCaptured(this, new CaptureEventArgs() { Image = image });
+							_frmCaptureVideo = new frmCaptureVideo();
+							_frmCaptureVideo.SetCaptureBounds(overlay.GetRectangle());
+							_frmCaptureVideo.VideoCaptured += delegate (object s2, EventArgs e2)
+							{
+								Captured(this, new CaptureEventArgs() { Images = _frmCaptureVideo.CapturedImages });
+								_frmCaptureVideo.Dispose();
+								_frmCaptureVideo = null;
+							};
+							_frmCaptureVideo.Show();
 							break;
+						}
+						else
+						{
+							using (var image = overlay.GetImage())
+							{
+								Captured(this, new CaptureEventArgs() { Images = new List<Image>() { image } });
+								break;
+							}
 						}
 					}
 				}
 
 				closeAll();
+				detachHooks();
 			}
 
 			_downX = null;
@@ -110,6 +130,14 @@ namespace PaJaMa.ScreenCapture
 			args.Cancel = true;
 		}
 
+		private void detachHooks()
+		{
+			_hooks.MouseMove -= _hooks_MouseMove;
+			_hooks.LeftMouseDown -= _hooks_LeftMouseDown;
+			_hooks.LeftMouseUp -= _hooks_LeftMouseUp;
+			_hooks.DeatchMouseHook();
+		}
+
 		private void closeAll()
 		{
 			foreach (var overlay in _overlays)
@@ -119,11 +147,6 @@ namespace PaJaMa.ScreenCapture
 			}
 
 			_overlays.Clear();
-			_hooks.MouseMove -= _hooks_MouseMove;
-			_hooks.LeftMouseDown -= _hooks_LeftMouseDown;
-			_hooks.LeftMouseUp -= _hooks_LeftMouseUp;
-			_hooks.DeatchMouseHook();
-
 			Cursor.Show();
 		}
 
@@ -167,7 +190,7 @@ namespace PaJaMa.ScreenCapture
 					graphics.CopyFromScreen(new Point(0, 0), new Point(0, 0), new Size(xStop, yStop));
 				}
 
-				PictureCaptured(this, new CaptureEventArgs() { Image = bmp });
+				Captured(this, new CaptureEventArgs() { Images = new List<Image>() { bmp } });
 			}
 		}
 
@@ -180,8 +203,21 @@ namespace PaJaMa.ScreenCapture
 					graphics.CopyFromScreen(screen.Bounds.Location, new Point(0, 0), screen.Bounds.Size);
 				}
 
-				PictureCaptured(this, new CaptureEventArgs() { Image = bmp });
+				Captured(this, new CaptureEventArgs() { Images = new List<Image>() { bmp } });
 			}
+		}
+
+		public void CaptureVideoScreen(Screen screen)
+		{
+			_frmCaptureVideo = new frmCaptureVideo();
+			_frmCaptureVideo.SetCaptureBounds(screen.Bounds);
+			_frmCaptureVideo.VideoCaptured += delegate (object s2, EventArgs e2)
+			{
+				Captured(this, new CaptureEventArgs() { Images = _frmCaptureVideo.CapturedImages });
+				_frmCaptureVideo.Dispose();
+				_frmCaptureVideo = null;
+			};
+			_frmCaptureVideo.Show();
 		}
 
 		public void Dispose()
@@ -194,6 +230,6 @@ namespace PaJaMa.ScreenCapture
 	public delegate void CaptureEventHandler(object sender, CaptureEventArgs e);
 	public class CaptureEventArgs : EventArgs
 	{
-		public Image Image { get; set; }
+		public List<Image> Images { get; set; }
 	}
 }

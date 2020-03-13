@@ -44,8 +44,9 @@
 			this.lstMain = new System.Windows.Forms.ListView();
 			this.ilMain = new System.Windows.Forms.ImageList(this.components);
 			this.splitMain = new System.Windows.Forms.SplitContainer();
-			this.ucImageEditor = new PaJaMa.ScreenCapture.ImageEditor.ucImageEditor();
 			this.panel1 = new System.Windows.Forms.Panel();
+			this.ucImageEditor = new PaJaMa.ScreenCapture.ImageEditor.ucImageEditor();
+			this.captureVideoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.mnuNotification.SuspendLayout();
 			this.contextMenuStrip1.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.splitMain)).BeginInit();
@@ -68,28 +69,29 @@
 			this.mnuNotification.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.captureToolStripMenuItem,
             this.captureFullScreenToolStripMenuItem,
+            this.captureVideoToolStripMenuItem,
             this.exitToolStripMenuItem});
 			this.mnuNotification.Name = "contextMenuStrip2";
-			this.mnuNotification.Size = new System.Drawing.Size(177, 70);
+			this.mnuNotification.Size = new System.Drawing.Size(181, 114);
 			// 
 			// captureToolStripMenuItem
 			// 
 			this.captureToolStripMenuItem.Name = "captureToolStripMenuItem";
-			this.captureToolStripMenuItem.Size = new System.Drawing.Size(176, 22);
-			this.captureToolStripMenuItem.Text = "Capture";
-			this.captureToolStripMenuItem.Click += new System.EventHandler(this.captureToolStripMenuItem_Click);
+			this.captureToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+			this.captureToolStripMenuItem.Text = "&Capture";
+			this.captureToolStripMenuItem.Click += new System.EventHandler(this.CaptureToolStripMenuItem_Click);
 			// 
 			// captureFullScreenToolStripMenuItem
 			// 
 			this.captureFullScreenToolStripMenuItem.Name = "captureFullScreenToolStripMenuItem";
-			this.captureFullScreenToolStripMenuItem.Size = new System.Drawing.Size(176, 22);
-			this.captureFullScreenToolStripMenuItem.Text = "Capture Full Screen";
+			this.captureFullScreenToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+			this.captureFullScreenToolStripMenuItem.Text = "Capture &Full Screen";
 			this.captureFullScreenToolStripMenuItem.Click += new System.EventHandler(this.captureFullScreenToolStripMenuItem_Click);
 			// 
 			// exitToolStripMenuItem
 			// 
 			this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-			this.exitToolStripMenuItem.Size = new System.Drawing.Size(176, 22);
+			this.exitToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
 			this.exitToolStripMenuItem.Text = "E&xit";
 			this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
 			// 
@@ -102,40 +104,40 @@
             this.showInExplorerToolStripMenuItem,
             this.deleteToolStripMenuItem});
 			this.contextMenuStrip1.Name = "contextMenuStrip1";
-			this.contextMenuStrip1.Size = new System.Drawing.Size(162, 114);
+			this.contextMenuStrip1.Size = new System.Drawing.Size(163, 114);
 			this.contextMenuStrip1.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip1_Opening);
 			// 
 			// openToolStripMenuItem
 			// 
 			this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-			this.openToolStripMenuItem.Size = new System.Drawing.Size(161, 22);
+			this.openToolStripMenuItem.Size = new System.Drawing.Size(162, 22);
 			this.openToolStripMenuItem.Text = "&Open";
 			this.openToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
 			// 
 			// openWithToolStripMenuItem
 			// 
 			this.openWithToolStripMenuItem.Name = "openWithToolStripMenuItem";
-			this.openWithToolStripMenuItem.Size = new System.Drawing.Size(161, 22);
+			this.openWithToolStripMenuItem.Size = new System.Drawing.Size(162, 22);
 			this.openWithToolStripMenuItem.Text = "Open &With";
 			// 
 			// copyToolStripMenuItem
 			// 
 			this.copyToolStripMenuItem.Name = "copyToolStripMenuItem";
-			this.copyToolStripMenuItem.Size = new System.Drawing.Size(161, 22);
+			this.copyToolStripMenuItem.Size = new System.Drawing.Size(162, 22);
 			this.copyToolStripMenuItem.Text = "&Copy";
 			this.copyToolStripMenuItem.Click += new System.EventHandler(this.copyToolStripMenuItem_Click);
 			// 
 			// showInExplorerToolStripMenuItem
 			// 
 			this.showInExplorerToolStripMenuItem.Name = "showInExplorerToolStripMenuItem";
-			this.showInExplorerToolStripMenuItem.Size = new System.Drawing.Size(161, 22);
+			this.showInExplorerToolStripMenuItem.Size = new System.Drawing.Size(162, 22);
 			this.showInExplorerToolStripMenuItem.Text = "&Show In Explorer";
 			this.showInExplorerToolStripMenuItem.Click += new System.EventHandler(this.showInExplorerToolStripMenuItem_Click);
 			// 
 			// deleteToolStripMenuItem
 			// 
 			this.deleteToolStripMenuItem.Name = "deleteToolStripMenuItem";
-			this.deleteToolStripMenuItem.Size = new System.Drawing.Size(161, 22);
+			this.deleteToolStripMenuItem.Size = new System.Drawing.Size(162, 22);
 			this.deleteToolStripMenuItem.Text = "&Delete";
 			this.deleteToolStripMenuItem.Click += new System.EventHandler(this.deleteToolStripMenuItem_Click);
 			// 
@@ -181,6 +183,16 @@
 			this.splitMain.SplitterDistance = 300;
 			this.splitMain.TabIndex = 5;
 			// 
+			// panel1
+			// 
+			this.panel1.AutoScroll = true;
+			this.panel1.Controls.Add(this.ucImageEditor);
+			this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.panel1.Location = new System.Drawing.Point(0, 0);
+			this.panel1.Name = "panel1";
+			this.panel1.Size = new System.Drawing.Size(785, 300);
+			this.panel1.TabIndex = 5;
+			// 
 			// ucImageEditor
 			// 
 			this.ucImageEditor.CurrentColor = System.Drawing.Color.Blue;
@@ -201,15 +213,12 @@
 			this.ucImageEditor.TabIndex = 4;
 			this.ucImageEditor.ImageDoubleClick += new System.EventHandler(this.ucImageEditor_ImageDoubleClick);
 			// 
-			// panel1
+			// captureVideoToolStripMenuItem
 			// 
-			this.panel1.AutoScroll = true;
-			this.panel1.Controls.Add(this.ucImageEditor);
-			this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.panel1.Location = new System.Drawing.Point(0, 0);
-			this.panel1.Name = "panel1";
-			this.panel1.Size = new System.Drawing.Size(785, 300);
-			this.panel1.TabIndex = 5;
+			this.captureVideoToolStripMenuItem.Name = "captureVideoToolStripMenuItem";
+			this.captureVideoToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+			this.captureVideoToolStripMenuItem.Text = "Capture &Video";
+			this.captureVideoToolStripMenuItem.Click += new System.EventHandler(this.CaptureVideoToolStripMenuItem_Click);
 			// 
 			// frmMain
 			// 
@@ -253,6 +262,7 @@
 		private ImageEditor.ucImageEditor ucImageEditor;
 		private System.Windows.Forms.SplitContainer splitMain;
 		private System.Windows.Forms.Panel panel1;
+		private System.Windows.Forms.ToolStripMenuItem captureVideoToolStripMenuItem;
 	}
 }
 
