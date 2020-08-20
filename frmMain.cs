@@ -62,7 +62,7 @@ namespace PaJaMa.ScreenCapture
 		{
 			if (e.Images.Count == 1)
 			{
-				captureImage(e.Images[0]);
+				captureImage(e.Images[0], e.SuspendShow);
 			}
 			else
 			{
@@ -70,7 +70,7 @@ namespace PaJaMa.ScreenCapture
 			}
 		}
 
-		private string captureImage(Image image)
+		private string captureImage(Image image, bool suspendShow = false)
 		{
 			_lockWatcher = true;
 			string imagePath = Path.Combine(_picturesDirectory.FullName, DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".png");
@@ -100,6 +100,7 @@ namespace PaJaMa.ScreenCapture
 
 			item.Selected = true;
 
+			if (suspendShow) return imagePath;
 			this.Visible = true;
 			this.ShowInTaskbar = true;
 			if (this.WindowState == FormWindowState.Minimized)

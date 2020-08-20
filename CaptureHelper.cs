@@ -68,7 +68,7 @@ namespace PaJaMa.ScreenCapture
 				if (e.Control)
 				{
 					var activeScreen = Screen.FromPoint(Cursor.Position);
-					CaptureScreen(activeScreen);
+					CaptureScreen(activeScreen, true);
 				}
 				else
 					StartCapture();
@@ -195,7 +195,7 @@ namespace PaJaMa.ScreenCapture
 			}
 		}
 
-		public void CaptureScreen(Screen screen)
+		public void CaptureScreen(Screen screen, bool suspendShow = false)
 		{
 			using (var bmp = new Bitmap(screen.Bounds.Width, screen.Bounds.Height))
 			{
@@ -204,7 +204,7 @@ namespace PaJaMa.ScreenCapture
 					graphics.CopyFromScreen(screen.Bounds.Location, new Point(0, 0), screen.Bounds.Size);
 				}
 
-				Captured(this, new CaptureEventArgs() { Images = new List<Image>() { bmp } });
+				Captured(this, new CaptureEventArgs() { Images = new List<Image>() { bmp }, SuspendShow = suspendShow });
 			}
 		}
 
@@ -232,5 +232,6 @@ namespace PaJaMa.ScreenCapture
 	public class CaptureEventArgs : EventArgs
 	{
 		public List<Image> Images { get; set; }
+		public bool SuspendShow { get; set; }
 	}
 }
